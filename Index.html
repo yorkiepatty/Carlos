@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CarloGPT: Neurodivergent AI Sidekick</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      width: 100%;
+      font-size: 1.1rem;
+      border-radius: 5px;
+      border: none;
+    }
+    .log {
+      margin-top: 1rem;
+      background: #222;
+      padding: 1rem;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+    button {
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>CarloGPT: Your Neurodivergent Sidekick</h1>
+  <input type="text" id="userInput" placeholder="Ask me anything..." />
+  <button onclick="askCarlo()">Ask</button>
+  <div class="log" id="log"></div>
 
+  <script>
+    async function askCarlo() {
+      const input = document.getElementById('userInput').value;
+      const log = document.getElementById('log');
+
+      if (!input.trim()) return;
+
+      log.innerText += `\nYou: ${input}`;
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer sk-YOUR-KEY-HERE"
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: input }]
+        })
+      });
+
+      const data = await response.json();
+      const message = data.choices[0].message.content;
+      log.innerText += `\nCarloGPT: ${message}\n`;
+      speak(message);
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = speechSynthesis.getVoices().find(v => v.name.includes("Google") || v.name.includes("English")) || null;
+      speechSynthesis.speak(utterance);
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => {};
+  </script>
+</body>
+</html>
